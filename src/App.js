@@ -1,7 +1,16 @@
+import Navbar from './components/Navbar';
+import ConfigurationSection from './components/ConfigurationSection';
+import ResultSection from './components/ResultSection';
+
 function App() {
+  const handleExport = () => {};
+  const handleImport = () => {};
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <h1 className="text-4xl font-bold text-blue-600">CarFin</h1>
+    <div className="min-h-screen flex flex-col bg-[#353535]">
+      <Navbar onExport={handleExport} onImport={handleImport} />
+      <ConfigurationSection />
+      <ResultSection />
     </div>
   );
 }
