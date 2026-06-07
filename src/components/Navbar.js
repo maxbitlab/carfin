@@ -1,9 +1,11 @@
 import React from 'react';
 
-function Navbar({ onExport, onImport }) {
+function Navbar({ onExport, onImport, projectName }) {
   return (
     <nav className="bg-[#3c6e71] text-white px-6 py-3 flex items-center justify-between">
-      <h1 className="text-xl font-bold">CarFin</h1>
+      <h1 className="text-xl font-bold">
+        {projectName ? `CarFin - ${projectName}` : 'CarFin'}
+      </h1>
       <div className="flex gap-2">
         <button
           onClick={onExport}

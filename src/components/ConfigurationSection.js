@@ -1,9 +1,22 @@
 import React, { useState } from 'react';
+import GeneralTab from './GeneralTab';
 
 const TABS = ['General', 'Cars', 'Expenses'];
 
-function ConfigurationSection() {
+function ConfigurationSection({ projectName, onProjectNameChange, ownershipDuration, onOwnershipDurationChange }) {
   const [activeTab, setActiveTab] = useState('General');
+
+  const renderTabContent = () => {
+    if (activeTab === 'General') return (
+      <GeneralTab
+        projectName={projectName}
+        onProjectNameChange={onProjectNameChange}
+        ownershipDuration={ownershipDuration}
+        onOwnershipDurationChange={onOwnershipDurationChange}
+      />
+    );
+    return <p>{activeTab} content placeholder</p>;
+  };
 
   return (
     <section className="flex-1 bg-[#353535] text-white p-4">
@@ -23,7 +36,7 @@ function ConfigurationSection() {
         ))}
       </div>
       <div className="p-4">
-        <p>{activeTab} content placeholder</p>
+        {renderTabContent()}
       </div>
     </section>
   );
