@@ -1,6 +1,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import App from './App';
 
+// echarts relies on canvas/layout APIs that jsdom does not implement.
+jest.mock('echarts', () => ({
+  init: () => ({
+    setOption: jest.fn(),
+    resize: jest.fn(),
+    dispose: jest.fn(),
+  }),
+}));
+
 test('renders navbar with project name', () => {
   render(<App />);
   expect(screen.getByText('CarFin')).toBeInTheDocument();
@@ -65,9 +74,11 @@ test('switches configuration tab on click', () => {
   expect(screen.getByLabelText('Add car')).toBeInTheDocument();
 });
 
-test('shows Chart placeholder by default in result section', () => {
+test('shows Chart tab by default in result section', () => {
   render(<App />);
-  expect(screen.getByText('Chart view placeholder')).toBeInTheDocument();
+  // The General tab is active so all cars are unnamed; the chart container is
+  // rendered (echarts is mocked) rather than the table totals.
+  expect(screen.queryByText('Total Expense Before Sale')).not.toBeInTheDocument();
 });
 
 test('switches result tab on click', () => {

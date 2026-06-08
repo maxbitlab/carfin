@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import TableTab from './TableTab';
+import ChartTab from './ChartTab';
 
 const TABS = ['Chart', 'Table'];
 
@@ -27,7 +28,7 @@ function ResultSection({ cars, expenses, ownershipDuration }) {
         {activeTab === 'Table' ? (
           <TableTab cars={cars} expenses={expenses} ownershipDuration={ownershipDuration} />
         ) : (
-          <p>{activeTab} view placeholder</p>
+          <ChartTab cars={cars} expenses={expenses} ownershipDuration={ownershipDuration} />
         )}
       </div>
     </section>
