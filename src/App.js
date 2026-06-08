@@ -29,7 +29,7 @@ function App() {
         expenses={expenses}
         onExpensesChange={setExpenses}
       />
-      <ResultSection />
+      <ResultSection cars={cars} expenses={expenses} ownershipDuration={ownershipDuration} />
     </div>
   );
 }

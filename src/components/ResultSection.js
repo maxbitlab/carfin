@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import TableTab from './TableTab';
 
 const TABS = ['Chart', 'Table'];
 
-function ResultSection() {
+function ResultSection({ cars, expenses, ownershipDuration }) {
   const [activeTab, setActiveTab] = useState('Chart');
 
   return (
@@ -23,7 +24,11 @@ function ResultSection() {
         ))}
       </div>
       <div className="p-4">
-        <p>{activeTab} view placeholder</p>
+        {activeTab === 'Table' ? (
+          <TableTab cars={cars} expenses={expenses} ownershipDuration={ownershipDuration} />
+        ) : (
+          <p>{activeTab} view placeholder</p>
+        )}
       </div>
     </section>
   );

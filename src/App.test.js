@@ -73,5 +73,5 @@ test('shows Chart placeholder by default in result section', () => {
 test('switches result tab on click', () => {
   render(<App />);
   fireEvent.click(screen.getByText('Table'));
-  expect(screen.getByText('Table view placeholder')).toBeInTheDocument();
+  expect(screen.getByText('Total Expense Before Sale')).toBeInTheDocument();
 });
