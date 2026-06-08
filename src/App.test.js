@@ -62,7 +62,7 @@ test('ownership duration defaults to 1 and can be changed', () => {
 test('switches configuration tab on click', () => {
   render(<App />);
   fireEvent.click(screen.getByText('Cars'));
-  expect(screen.getByText('Cars content placeholder')).toBeInTheDocument();
+  expect(screen.getByLabelText('Add car')).toBeInTheDocument();
 });
 
 test('shows Chart placeholder by default in result section', () => {

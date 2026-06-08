@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import GeneralTab from './GeneralTab';
+import CarTab from './CarTab';
+import ExpensesTab from './ExpensesTab';
 
 const TABS = ['General', 'Cars', 'Expenses'];
 
-function ConfigurationSection({ projectName, onProjectNameChange, ownershipDuration, onOwnershipDurationChange }) {
+function ConfigurationSection({ projectName, onProjectNameChange, ownershipDuration, onOwnershipDurationChange, cars, onCarsChange, expenses, onExpensesChange }) {
   const [activeTab, setActiveTab] = useState('General');
 
   const renderTabContent = () => {
@@ -14,6 +16,12 @@ function ConfigurationSection({ projectName, onProjectNameChange, ownershipDurat
         ownershipDuration={ownershipDuration}
         onOwnershipDurationChange={onOwnershipDurationChange}
       />
+    );
+    if (activeTab === 'Cars') return (
+      <CarTab cars={cars} onCarsChange={onCarsChange} />
+    );
+    if (activeTab === 'Expenses') return (
+      <ExpensesTab cars={cars} expenses={expenses} onExpensesChange={onExpensesChange} />
     );
     return <p>{activeTab} content placeholder</p>;
   };
