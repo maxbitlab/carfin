@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
+import { STORAGE_KEY } from './utils/storage';
 
 // echarts relies on canvas/layout APIs that jsdom does not implement.
 jest.mock('echarts', () => ({
@@ -9,6 +10,10 @@ jest.mock('echarts', () => ({
     dispose: jest.fn(),
   }),
 }));
+
+beforeEach(() => {
+  window.localStorage.clear();
+});
 
 test('renders navbar with project name', () => {
   render(<App />);
@@ -85,4 +90,62 @@ test('switches result tab on click', () => {
   render(<App />);
   fireEvent.click(screen.getByText('Table'));
   expect(screen.getByText('Total Expense Before Sale')).toBeInTheDocument();
+});
+
+test('clicking export triggers a JSON download', () => {
+  const createObjectURL = jest.fn(() => 'blob:url');
+  const revokeObjectURL = jest.fn();
+  global.URL.createObjectURL = createObjectURL;
+  global.URL.revokeObjectURL = revokeObjectURL;
+  const clickSpy = jest
+    .spyOn(window.HTMLAnchorElement.prototype, 'click')
+    .mockImplementation(() => {});
+
+  render(<App />);
+  fireEvent.click(screen.getByText('Export'));
+
+  expect(createObjectURL).toHaveBeenCalledTimes(1);
+  expect(clickSpy).toHaveBeenCalledTimes(1);
+  clickSpy.mockRestore();
+});
+
+test('importing a valid file loads the configuration and clears old data', async () => {
+  render(<App />);
+  fireEvent.change(screen.getByLabelText('Project Name'), {
+    target: { value: 'Old Project' },
+  });
+
+  const fileInput = screen.getByLabelText('Import configuration file');
+  const config = {
+    projectName: 'Imported Project',
+    ownershipDuration: 7,
+    cars: [{ id: 1, name: 'Imported Car' }],
+    expenses: { 1: { fuel: 50 } },
+  };
+  const file = new File([JSON.stringify(config)], 'config.json', {
+    type: 'application/json',
+  });
+
+  fireEvent.change(fileInput, { target: { files: [file] } });
+
+  await waitFor(() => {
+    expect(screen.getByText('CarFin - Imported Project')).toBeInTheDocument();
+  });
+  const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
+  expect(stored.projectName).toBe('Imported Project');
+  expect(stored.ownershipDuration).toBe(7);
+});
+
+test('importing an invalid file shows an error message', async () => {
+  render(<App />);
+  const fileInput = screen.getByLabelText('Import configuration file');
+  const file = new File(['{not valid json'], 'bad.json', {
+    type: 'application/json',
+  });
+
+  fireEvent.change(fileInput, { target: { files: [file] } });
+
+  await waitFor(() => {
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
 });

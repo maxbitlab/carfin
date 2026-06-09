@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Navbar({ onExport, onImport, projectName }) {
+function Navbar({ onExport, onImport, onClearData, projectName }) {
   return (
     <nav className="bg-[#3c6e71] text-white px-6 py-3 flex items-center justify-between">
       <h1 className="text-xl font-bold">
@@ -18,6 +18,12 @@ function Navbar({ onExport, onImport, projectName }) {
           className="bg-[#353535] text-white px-4 py-1 rounded hover:opacity-80"
         >
           Import
+        </button>
+        <button
+          onClick={onClearData}
+          className="bg-[#353535] text-white px-4 py-1 rounded hover:opacity-80"
+        >
+          Clear Data
         </button>
       </div>
     </nav>

@@ -2,6 +2,26 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Data Persistence
+
+All configuration parameters (project name, ownership duration, cars, and expenses)
+are automatically saved to the browser's `localStorage` and restored after a page
+reload. Use the **Clear Data** button in the navigation bar to remove the stored data
+and reset the app to its defaults.
+
+## Import / Export
+
+Use the **Export** button in the navigation bar to merge all configuration
+properties (project name, ownership duration, cars, and expenses) into a single
+JSON file and download it to your computer. The downloaded file is named
+`carfin-{project-name}.json` (e.g. `carfin-my-project.json`); when no project
+name is set it falls back to `carfin-config.json`.
+
+Use the **Import** button to select a previously exported JSON file. When a valid
+file is selected, any existing data is automatically cleared and the imported
+parameters are loaded and stored in the browser. If the selected file is invalid,
+an error message is displayed.
+
 ## Available Scripts
 
 In the project directory, you can run:

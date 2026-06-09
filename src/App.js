@@ -1,24 +1,93 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createCar } from './components/CarTab';
 import Navbar from './components/Navbar';
 import ConfigurationSection from './components/ConfigurationSection';
 import ResultSection from './components/ResultSection';
+import { loadState, saveState, clearState } from './utils/storage';
+import { downloadStateAsJson, parseImportedState, buildExportFileName } from './utils/portability';
 
 function App() {
-  const [projectName, setProjectName] = useState('');
-  const [ownershipDuration, setOwnershipDuration] = useState(1);
-  const [cars, setCars] = useState([createCar(1)]);
-  const [expenses, setExpenses] = useState({});
-  const handleExport = () => {};
-  const handleImport = () => {};
+  const persisted = loadState();
+  const [projectName, setProjectName] = useState(persisted?.projectName ?? '');
+  const [ownershipDuration, setOwnershipDuration] = useState(persisted?.ownershipDuration ?? 1);
+  const [cars, setCars] = useState(persisted?.cars ?? [createCar(1)]);
+  const [expenses, setExpenses] = useState(persisted?.expenses ?? {});
+  const [importError, setImportError] = useState('');
+  const fileInputRef = useRef(null);
+
+  const handleExport = () => {
+    downloadStateAsJson(
+      { projectName, ownershipDuration, cars, expenses },
+      buildExportFileName(projectName)
+    );
+  };
+
+  const handleImport = () => {
+    setImportError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileSelected = (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = parseImportedState(reader.result);
+        clearState();
+        setProjectName(imported.projectName);
+        setOwnershipDuration(imported.ownershipDuration);
+        setCars(imported.cars);
+        setExpenses(imported.expenses);
+        setImportError('');
+      } catch (e) {
+        setImportError(e.message);
+      }
+    };
+    reader.onerror = () => {
+      setImportError('Could not read the selected file.');
+    };
+    reader.readAsText(file);
+  };
+
+  const handleClearData = () => {
+    clearState();
+    setProjectName('');
+    setOwnershipDuration(1);
+    setCars([createCar(1)]);
+    setExpenses({});
+    setImportError('');
+  };
 
   useEffect(() => {
     document.title = projectName ? `CarFin - ${projectName}` : 'CarFin';
   }, [projectName]);
 
+  useEffect(() => {
+    saveState({ projectName, ownershipDuration, cars, expenses });
+  }, [projectName, ownershipDuration, cars, expenses]);
+
   return (
     <div className="min-h-screen flex flex-col bg-[#353535]">
-      <Navbar onExport={handleExport} onImport={handleImport} projectName={projectName} />
+      <Navbar onExport={handleExport} onImport={handleImport} onClearData={handleClearData} projectName={projectName} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json,.json"
+        aria-label="Import configuration file"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
+      {importError && (
+        <div role="alert" className="bg-[#3c6e71] text-white px-6 py-2 text-center">
+          {importError}
+        </div>
+      )}
       <ConfigurationSection
         projectName={projectName}
         onProjectNameChange={setProjectName}
