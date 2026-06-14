@@ -1,17 +1,19 @@
-import React from 'react';
+import { carLabel } from './car';
 
-function num(value) {
+// Parses a value into a finite number, returning 0 for anything non-numeric.
+export function num(value) {
   const n = parseFloat(value);
   return Number.isFinite(n) ? n : 0;
 }
 
-function annualFromPeriod(amount, period) {
+// Normalises a periodic amount to a yearly figure.
+export function annualFromPeriod(amount, period) {
   return period === 'month' ? num(amount) * 12 : num(amount);
 }
 
 // Common expense categories. Each returns the total expense over the whole
 // ownership duration (in years) for a single car's expense object.
-const COMMON_CATEGORIES = [
+export const COMMON_CATEGORIES = [
   {
     key: 'tax',
     label: 'Tax',
@@ -36,7 +38,7 @@ const COMMON_CATEGORIES = [
 
 // Finance expense categories. Each category only contributes a value when the
 // car's selected finance type matches.
-const FINANCE_CATEGORIES = [
+export const FINANCE_CATEGORIES = [
   {
     key: 'cashTotal',
     label: 'Cash Total Amount',
@@ -69,14 +71,9 @@ const FINANCE_CATEGORIES = [
   },
 ];
 
-function carLabel(car) {
-  const parts = [car.brand, car.make].filter(Boolean);
-  return parts.length > 0 ? parts.join(' ') : 'Unnamed Car';
-}
-
 // Builds the structured table data: a list of rows (category totals, total
 // before sale, final cost) with a computed value per car.
-function computeTableData(cars, expenses, ownershipDuration) {
+export function computeTableData(cars, expenses, ownershipDuration) {
   const years = num(ownershipDuration);
   const carExpenses = cars.map((car) => expenses[car.id] || null);
 
@@ -115,78 +112,53 @@ function computeTableData(cars, expenses, ownershipDuration) {
   };
 }
 
-function formatValue(value) {
-  return value.toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-}
-
-function TableTab({ cars, expenses, ownershipDuration }) {
-  if (!cars || cars.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-full text-[#3c6e71]">
-        <p>Add a car to see the cost breakdown.</p>
-      </div>
-    );
+// Splits a car's expense object into the three timing buckets used by the
+// chart: a one-off initial cost (month 0), an annual cost (month 0, 12, 24...)
+// and a recurring monthly cost (every month).
+export function expenseBuckets(e) {
+  if (!e) {
+    return { initial: 0, annual: 0, monthly: 0 };
   }
 
-  const { categoryRows, totalBeforeSale, finalCost, hasEndOfOwnership } = computeTableData(
-    cars,
-    expenses,
-    ownershipDuration
-  );
+  const initial =
+    (e.financeType === 'Cash' ? num(e.cash && e.cash.totalAmount) : 0) +
+    (e.financeType === 'Loan' ? num(e.loan && e.loan.initialPayment) : 0) +
+    (e.financeType === 'Lease' ? num(e.lease && e.lease.initialPayment) : 0);
 
-  const cellClass = 'px-4 py-2 border border-[#3c6e71] text-right';
-  const headClass = 'px-4 py-2 border border-[#3c6e71] text-left';
+  const annual =
+    num(e.motServicePerYear) +
+    (e.taxPeriod === 'year' ? num(e.taxAmount) : 0) +
+    (e.insurancePeriod === 'year' ? num(e.insuranceAmount) : 0);
 
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-white">
-        <thead>
-          <tr>
-            <th className={headClass}>Expense</th>
-            {cars.map((car) => (
-              <th key={car.id} className={`${headClass} text-right`}>
-                {carLabel(car)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {categoryRows.map((row) => (
-            <tr key={row.key}>
-              <td className={headClass}>{row.label}</td>
-              {row.values.map((value, i) => (
-                <td key={cars[i].id} className={cellClass}>
-                  {formatValue(value)}
-                </td>
-              ))}
-            </tr>
-          ))}
-          <tr className="font-bold">
-            <td className={headClass}>Total Expense Before Sale</td>
-            {totalBeforeSale.map((value, i) => (
-              <td key={cars[i].id} className={cellClass}>
-                {formatValue(value)}
-              </td>
-            ))}
-          </tr>
-          {hasEndOfOwnership && (
-            <tr className="font-bold">
-              <td className={headClass}>Final Cost</td>
-              {finalCost.map((value, i) => (
-                <td key={cars[i].id} className={cellClass}>
-                  {formatValue(value)}
-                </td>
-              ))}
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
+  const monthly =
+    num(e.fuelMonthly) +
+    (e.financeType === 'Loan' ? num(e.loan && e.loan.monthlyPayment) : 0) +
+    (e.financeType === 'Lease' ? num(e.lease && e.lease.monthlyPayment) : 0) +
+    (e.taxPeriod === 'month' ? num(e.taxAmount) : 0) +
+    (e.insurancePeriod === 'month' ? num(e.insuranceAmount) : 0);
+
+  return { initial, annual, monthly };
 }
 
-export { computeTableData, COMMON_CATEGORIES, FINANCE_CATEGORIES };
-export default TableTab;
+// Builds the chart data: an array of month indices (0..totalMonths) and one
+// series per car holding the cumulative total expense at each month. Nothing is
+// evaluated beyond the ownership duration.
+export function computeChartSeries(cars, expenses, ownershipDuration) {
+  const totalMonths = Math.max(0, Math.round(num(ownershipDuration) * 12));
+  const months = [];
+  for (let m = 0; m <= totalMonths; m += 1) {
+    months.push(m);
+  }
+
+  const series = (cars || []).map((car) => {
+    const { initial, annual, monthly } = expenseBuckets(expenses ? expenses[car.id] : null);
+    const data = months.map((m) => {
+      const annualOccurrences = Math.floor(m / 12) + 1; // months 0, 12, 24...
+      const monthlyOccurrences = m; // one payment per elapsed month
+      return initial + annual * annualOccurrences + monthly * monthlyOccurrences;
+    });
+    return { name: carLabel(car), data };
+  });
+
+  return { months, series };
+}

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import ExpensesTab, { createExpense } from './ExpensesTab';
+import ExpensesTab from './ExpensesTab';
+import { createExpense } from '../../domain/expense';
 
 const cars = [
   { id: 1, brand: 'Toyota', make: 'Corolla' },

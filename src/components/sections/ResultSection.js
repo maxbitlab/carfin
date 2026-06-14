@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import TableTab from './TableTab';
-import ChartTab from './ChartTab';
+import TableTab from '../tabs/TableTab';
+import ChartTab from '../tabs/ChartTab';
 
 const TABS = ['Chart', 'Table'];
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import GeneralTab from './GeneralTab';
-import CarTab from './CarTab';
-import ExpensesTab from './ExpensesTab';
+import GeneralTab from '../tabs/GeneralTab';
+import CarTab from '../tabs/CarTab';
+import ExpensesTab from '../tabs/ExpensesTab';
 
 const TABS = ['General', 'Cars', 'Expenses'];
 

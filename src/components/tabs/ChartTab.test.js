@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import ChartTab, { computeChartSeries, expenseBuckets } from './ChartTab';
-import { createExpense } from './ExpensesTab';
+import ChartTab from './ChartTab';
+import { computeChartSeries, expenseBuckets } from '../../domain/calculations';
+import { createExpense } from '../../domain/expense';
 
 // echarts relies on canvas/layout APIs that jsdom does not implement, so we
 // mock it for the rendering tests. The pure computation functions are tested

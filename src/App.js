@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { createCar } from './components/CarTab';
-import Navbar from './components/Navbar';
-import ConfigurationSection from './components/ConfigurationSection';
-import ResultSection from './components/ResultSection';
+import { createCar } from './domain/car';
+import Navbar from './components/layout/Navbar';
+import ConfigurationSection from './components/sections/ConfigurationSection';
+import ResultSection from './components/sections/ResultSection';
 import { loadState, saveState, clearState } from './utils/storage';
 import { downloadStateAsJson, parseImportedState, buildExportFileName } from './utils/portability';
 

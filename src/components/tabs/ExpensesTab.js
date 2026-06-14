@@ -1,34 +1,6 @@
 import React, { useState } from 'react';
-
-const PERIODS = ['year', 'month'];
-const FINANCE_TYPES = ['Cash', 'Loan', 'Lease'];
-
-function createExpense() {
-  return {
-    taxAmount: 0,
-    taxPeriod: 'year',
-    insuranceAmount: 0,
-    insurancePeriod: 'year',
-    motServicePerYear: 0,
-    fuelMonthly: 0,
-    financeType: 'Cash',
-    cash: {
-      totalAmount: 0,
-    },
-    loan: {
-      initialPayment: 0,
-      monthlyPayment: 0,
-      duration: 0,
-      buyOutValue: 0,
-    },
-    lease: {
-      initialPayment: 0,
-      monthlyPayment: 0,
-      duration: 0,
-    },
-    endOfOwnershipValue: 0,
-  };
-}
+import { createExpense, PERIODS, FINANCE_TYPES } from '../../domain/expense';
+import { carLabel } from '../../domain/car';
 
 const inputClass =
   'w-full px-3 py-2 rounded bg-[#353535] border border-[#3c6e71] text-white focus:outline-none focus:ring-1 focus:ring-[#3c6e71]';
@@ -167,11 +139,6 @@ function ExpensesTab({ cars, expenses, onExpensesChange }) {
     onExpensesChange({ ...expenses, [selectedId]: updatedExpense });
   };
 
-  const carLabel = (car) => {
-    const parts = [car.brand, car.make].filter(Boolean);
-    return parts.length > 0 ? parts.join(' ') : 'Unnamed Car';
-  };
-
   return (
     <div className="flex flex-col md:flex-row gap-4 h-full">
       {/* Left panel — car list */}
@@ -199,5 +166,4 @@ function ExpensesTab({ cars, expenses, onExpensesChange }) {
   );
 }
 
-export { createExpense, PERIODS, FINANCE_TYPES };
 export default ExpensesTab;

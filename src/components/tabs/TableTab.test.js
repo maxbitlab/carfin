@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import TableTab, { computeTableData } from './TableTab';
-import { createExpense } from './ExpensesTab';
+import TableTab from './TableTab';
+import { computeTableData } from '../../domain/calculations';
+import { createExpense } from '../../domain/expense';
 
 function makeCar(id, brand = 'Brand', make = 'Make') {
   return { id, brand, make };

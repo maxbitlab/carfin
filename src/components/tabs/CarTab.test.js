@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import CarTab, { createCar, BODY_TYPES, FUEL_TYPES, GEARBOX_TYPES } from './CarTab';
+import CarTab from './CarTab';
+import { createCar, BODY_TYPES, FUEL_TYPES, GEARBOX_TYPES } from '../../domain/car';
 
 function renderCarTab(cars, onCarsChange) {
   return render(<CarTab cars={cars} onCarsChange={onCarsChange} />);

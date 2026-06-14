@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-
-const BODY_TYPES = ['Coupe', 'Convertible', 'Estate', 'Hatchback', 'MPV', 'Saloon', 'SUV'];
-const FUEL_TYPES = ['Petrol', 'Diesel', 'Hybrid', 'Plugin Hybrid', 'Electric'];
-const GEARBOX_TYPES = ['Automatic', 'Manual'];
+import { createCar, carLabel, BODY_TYPES, FUEL_TYPES, GEARBOX_TYPES } from '../../domain/car';
 
 function CarForm({ car, onChange }) {
   if (!car) {
@@ -79,23 +76,6 @@ function CarForm({ car, onChange }) {
   );
 }
 
-function createCar(id) {
-  return {
-    id,
-    brand: '',
-    make: '',
-    year: '',
-    bodyType: '',
-    fuelType: '',
-    range: '',
-    seats: '',
-    bootSpace1Row: '',
-    bootSpace2Row: '',
-    bootSpace3Row: '',
-    gearbox: '',
-  };
-}
-
 function CarTab({ cars, onCarsChange }) {
   const [selectedId, setSelectedId] = useState(null);
 
@@ -118,11 +98,6 @@ function CarTab({ cars, onCarsChange }) {
 
   const handleCarChange = (updatedCar) => {
     onCarsChange(cars.map((c) => (c.id === updatedCar.id ? updatedCar : c)));
-  };
-
-  const carLabel = (car) => {
-    const parts = [car.brand, car.make].filter(Boolean);
-    return parts.length > 0 ? parts.join(' ') : 'Unnamed Car';
   };
 
   return (
@@ -168,5 +143,4 @@ function CarTab({ cars, onCarsChange }) {
   );
 }
 
-export { createCar, BODY_TYPES, FUEL_TYPES, GEARBOX_TYPES };
 export default CarTab;
