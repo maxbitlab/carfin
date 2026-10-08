@@ -67,6 +67,7 @@ function ChartTab({ cars, expenses, ownershipDuration }) {
       series: series.map((s) => ({
         name: s.name,
         type: 'line',
+        step: s.maintenanceMode === 'historic' ? 'end' : false,
         emphasis: { focus: 'series' },
         data: s.data,
       })),

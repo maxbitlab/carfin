@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import TableTab from './TableTab';
 import { computeTableData } from '../../domain/calculations';
 import { createExpense } from '../../domain/expense';
@@ -97,4 +97,41 @@ test('does not render final cost row when no car has end of ownership value', ()
 test('renders empty state when there are no cars', () => {
   render(<TableTab cars={[]} expenses={{}} ownershipDuration={1} />);
   expect(screen.getByText('Add a car to see the cost breakdown.')).toBeInTheDocument();
+});
+
+test('schedule table exposes date-derived gaps and out-of-horizon entries alongside mixed totals', () => {
+  const e = createExpense();
+  e.motServicePerYear = 900;
+  e.maintenance = { mode: 'historic', firstServiceOffsetMonths: 12, entries: [
+    { id: 'third', date: '2022-07-01', price: 500 },
+    { id: 'first', date: '2021-01-01', price: 300 },
+    { id: 'second', date: '2022-01-01', price: 400 },
+  ] };
+  const estimated = { ...createExpense(), motServicePerYear: 400 };
+  const props = { cars: [makeCar(1, 'Audi', 'A4'), makeCar(2, 'BMW', '3')], expenses: { 1: e, 2: estimated } };
+  const { rerender } = render(<TableTab {...props} ownershipDuration={2} />);
+  const schedule = screen.getByRole('table', { name: 'Maintenance cost schedule' });
+  expect(screen.getByText('Each record is charged once. Records in the final ownership month are included.')).toBeInTheDocument();
+  const rows = within(schedule).getAllByRole('row').slice(1);
+  expect(rows.map((r) => within(r).getAllByRole('cell').map((c) => c.textContent)))
+    .toEqual([
+      ['Audi A4', '2021-01-01', '12', '300', 'Included'],
+      ['Audi A4', '2022-01-01', '24', '400', 'Included'],
+      ['Audi A4', '2022-07-01', '30', '500', 'Beyond ownership period'],
+    ]);
+  let totals = screen.getByText('Service & MOT').closest('tr');
+  expect(within(totals).getAllByRole('cell').map((c) => c.textContent)).toEqual(['Service & MOT', '700', '800']);
+  rerender(<TableTab {...props} ownershipDuration={3} />);
+  totals = screen.getByText('Service & MOT').closest('tr');
+  expect(within(totals).getAllByRole('cell').map((c) => c.textContent)).toEqual(['Service & MOT', '1,200', '1,200']);
+  expect(screen.queryByText('Beyond ownership period')).not.toBeInTheDocument();
+});
+
+test('empty historic mode shows a schedule empty state and never revives an estimate', () => {
+  const e = createExpense();
+  e.motServicePerYear = 900;
+  e.maintenance.mode = 'historic';
+  render(<TableTab cars={[makeCar(1)]} expenses={{ 1: e }} ownershipDuration={3} />);
+  expect(screen.getByText('No maintenance records.')).toBeInTheDocument();
+  expect(screen.getByText('Service & MOT').closest('tr')).toHaveTextContent('0');
 });

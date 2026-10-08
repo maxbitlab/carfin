@@ -12,6 +12,7 @@ function App() {
   const [ownershipDuration, setOwnershipDuration] = useState(persisted?.ownershipDuration ?? 1);
   const [cars, setCars] = useState(persisted?.cars ?? [createCar(1)]);
   const [expenses, setExpenses] = useState(persisted?.expenses ?? {});
+  const [configurationRevision, setConfigurationRevision] = useState(0);
   const [importError, setImportError] = useState('');
   const fileInputRef = useRef(null);
 
@@ -44,6 +45,7 @@ function App() {
         setOwnershipDuration(imported.ownershipDuration);
         setCars(imported.cars);
         setExpenses(imported.expenses);
+        setConfigurationRevision((revision) => revision + 1);
         setImportError('');
       } catch (e) {
         setImportError(e.message);
@@ -61,6 +63,7 @@ function App() {
     setOwnershipDuration(1);
     setCars([createCar(1)]);
     setExpenses({});
+    setConfigurationRevision((revision) => revision + 1);
     setImportError('');
   };
 
@@ -97,6 +100,7 @@ function App() {
         onCarsChange={setCars}
         expenses={expenses}
         onExpensesChange={setExpenses}
+        configurationRevision={configurationRevision}
       />
       <ResultSection cars={cars} expenses={expenses} ownershipDuration={ownershipDuration} />
     </div>

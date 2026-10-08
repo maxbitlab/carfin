@@ -1,3 +1,5 @@
+import { maintenanceValidationError } from '../domain/expense';
+
 export const EXPORT_FILE_NAME = 'carfin-config.json';
 
 // Builds the export file name, including the project name when available.
@@ -55,6 +57,13 @@ export function parseImportedState(raw) {
   if (!expenses || typeof expenses !== 'object' || Array.isArray(expenses)) {
     throw new Error('Invalid configuration file.');
   }
+
+  Object.entries(expenses).forEach(([carId, expense]) => {
+    if (expense && Object.prototype.hasOwnProperty.call(expense, 'maintenance')) {
+      const error = maintenanceValidationError(expense.maintenance);
+      if (error) throw new Error(`Invalid maintenance for car ${carId}: ${error}`);
+    }
+  });
 
   return { projectName, ownershipDuration, cars, expenses };
 }

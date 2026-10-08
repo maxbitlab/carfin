@@ -2,17 +2,22 @@ import { render, screen } from '@testing-library/react';
 import ChartTab from './ChartTab';
 import { computeChartSeries, expenseBuckets } from '../../domain/calculations';
 import { createExpense } from '../../domain/expense';
+import * as echarts from 'echarts';
 
 // echarts relies on canvas/layout APIs that jsdom does not implement, so we
 // mock it for the rendering tests. The pure computation functions are tested
 // directly without involving echarts.
 jest.mock('echarts', () => ({
-  init: () => ({
+  init: jest.fn(),
+}));
+
+beforeEach(() => {
+  echarts.init.mockImplementation(() => ({
     setOption: jest.fn(),
     resize: jest.fn(),
     dispose: jest.fn(),
-  }),
-}));
+  }));
+});
 
 function makeCar(id, brand = 'Brand', make = 'Make') {
   return { id, brand, make };
@@ -120,4 +125,35 @@ describe('ChartTab rendering', () => {
     );
     expect(container.querySelector('div')).toBeInTheDocument();
   });
+});
+
+test('ECharts uses historic event steps and updates when ownership duration changes', () => {
+  const historic = createExpense();
+  historic.motServicePerYear = 900;
+  historic.maintenance = { mode: 'historic', firstServiceOffsetMonths: 12, entries: [
+    { id: 'first', date: '2021-01-01', price: 300 },
+    { id: 'second', date: '2022-01-01', price: 400 },
+  ] };
+  const estimated = { ...createExpense(), motServicePerYear: 400 };
+  const cars = [makeCar(1), makeCar(2)];
+  const { rerender } = render(<ChartTab cars={cars} expenses={{ 1: historic, 2: estimated }} ownershipDuration={2} />);
+  const chart = echarts.init.mock.results[echarts.init.mock.results.length - 1].value;
+  let option = chart.setOption.mock.calls[chart.setOption.mock.calls.length - 1][0];
+  expect(option.xAxis.data).toHaveLength(25);
+  expect(option.series[0]).toMatchObject({ type: 'line', step: 'end' });
+  expect(option.series[0].data[11]).toBe(0);
+  expect(option.series[0].data[12]).toBe(300);
+  expect(option.series[0].data[24]).toBe(700);
+  expect(option.series[1].step).toBe(false);
+  expect(option.series[1].data[24]).toBe(1200);
+  rerender(<ChartTab cars={[cars[1], cars[0]]} expenses={{ 1: historic, 2: estimated }} ownershipDuration={2} />);
+  option = chart.setOption.mock.calls[chart.setOption.mock.calls.length - 1][0];
+  expect(option.series[0]).toMatchObject({ name: 'Brand Make', step: false });
+  expect(option.series[0].data[24]).toBe(1200);
+  expect(option.series[1]).toMatchObject({ name: 'Brand Make', step: 'end' });
+  expect(option.series[1].data[24]).toBe(700);
+  rerender(<ChartTab cars={cars} expenses={{ 1: historic, 2: estimated }} ownershipDuration={1} />);
+  option = chart.setOption.mock.calls[chart.setOption.mock.calls.length - 1][0];
+  expect(option.xAxis.data).toHaveLength(13);
+  expect(option.series[0].data[12]).toBe(300);
 });

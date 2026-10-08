@@ -5,7 +5,7 @@ import ExpensesTab from '../tabs/ExpensesTab';
 
 const TABS = ['General', 'Cars', 'Expenses'];
 
-function ConfigurationSection({ projectName, onProjectNameChange, ownershipDuration, onOwnershipDurationChange, cars, onCarsChange, expenses, onExpensesChange }) {
+function ConfigurationSection({ projectName, onProjectNameChange, ownershipDuration, onOwnershipDurationChange, cars, onCarsChange, expenses, onExpensesChange, configurationRevision }) {
   const [activeTab, setActiveTab] = useState('General');
 
   const renderTabContent = () => {
@@ -21,7 +21,7 @@ function ConfigurationSection({ projectName, onProjectNameChange, ownershipDurat
       <CarTab cars={cars} onCarsChange={onCarsChange} />
     );
     if (activeTab === 'Expenses') return (
-      <ExpensesTab cars={cars} expenses={expenses} onExpensesChange={onExpensesChange} />
+      <ExpensesTab key={configurationRevision} cars={cars} expenses={expenses} onExpensesChange={onExpensesChange} />
     );
     return <p>{activeTab} content placeholder</p>;
   };

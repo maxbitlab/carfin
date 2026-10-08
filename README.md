@@ -19,8 +19,55 @@ name is set it falls back to `carfin-config.json`.
 
 Use the **Import** button to select a previously exported JSON file. When a valid
 file is selected, any existing data is automatically cleared and the imported
-parameters are loaded and stored in the browser. If the selected file is invalid,
-an error message is displayed.
+parameters are loaded and stored in the browser. Any unsaved maintenance draft is
+discarded when a configuration is imported or **Clear Data** is used. If the
+selected file is invalid, an error message is displayed and the current configuration
+and any open draft remain unchanged.
+
+## Maintenance expenses
+
+In **Expenses**, select a car and use **Maintenance** to choose a **Calculation
+method**. New cars start with **Annual estimate**, set to 0. Existing saved annual
+estimates continue to work. Switching methods keeps both the estimate and saved
+records; only the selected method contributes to results.
+
+With **Recorded costs**, use **Add record**, enter a cost of 0 or more and a valid
+maintenance date, and optionally describe the work in Notes. Use **Save** to commit
+or **Cancel** to discard a draft. **Edit** changes any record field, and **Delete**
+immediately removes a saved record. Records are listed chronologically; records
+with the same date remain separate. Switching cars discards unsaved drafts.
+
+**First maintenance month** defaults to 12 and accepts whole nonnegative months,
+including 0. It counts months after ownership starts; 0 means immediately. Records
+follow their calendar-month gaps from the earliest maintenance date. Day differences
+within a month are ignored, including at month ends and on leap days. For example,
+dates 2021-01-01, 2022-01-01, and 2022-07-01 with first month 12 schedule at
+ownership months 12, 24, and 30. Adding, editing, or deleting the earliest record
+re-anchors the whole schedule. The **How scheduling works** disclosure in Expenses
+also explains these rules.
+
+Each recorded cost is charged once, without projecting future maintenance. The
+chart steps up at each scheduled month; the comparison table sums charges inside
+the ownership period. Both include the endpoint at the ownership duration in years
+multiplied by 12 and rounded to the nearest month. The **Maintenance cost schedule**
+shows recorded dates, ownership months, costs, and whether each record contributes
+to totals. Records beyond ownership remain saved and editable. Annual estimates
+retain their existing behavior: table totals multiply the estimate by ownership
+years, while the chart charges it at month 0 and every 12 months, including the
+endpoint anniversary.
+
+**Annualized history average** is informational: it uses all saved maintenance
+records over a period of at least 12 months. The averaging span and first/last
+recorded dates are shown when available. Empty history shows 0; one record or
+records within a year use a one-year denominator. The example above totals 1,200
+over 18 months, averaging 800 per year. This includes records outside ownership
+and does not change with the first month or ownership duration. Result totals use
+scheduled costs.
+
+Mode, offset, entries, IDs, dates, prices, and notes persist through reload and
+JSON export/import. Invalid maintenance imports show a field-specific error and
+leave the current configuration intact. **Clear Data** resets maintenance along
+with the rest of the configuration.
 
 ## Available Scripts
 
